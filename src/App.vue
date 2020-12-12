@@ -1,28 +1,90 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <Header @setting="setting"/>
+    <div class="container">
+    <div class="board" contenteditable="true" @input="onInput">
+      <span 
+        v-for="word in words" 
+        :key="word.id" 
+        :style="{
+          color: settings.color,
+          fontSize: settings.fontSize + 'px',
+          backgroundColor: settings.backgroundColor,
+          fontFamily: settings.fontFamily,
+          fontWeight: settings.fontWeight,
+          }"
+        > 
+          {{word.text}}
+        </span>
+    </div>
+  </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-
+import './assets/normalize.scss'
+import Header from './components/Header'
 export default {
   name: "App",
+  data() {
+    return {
+      board: '',
+      settings: {
+        fontSize: '14',
+        color: 'black',
+        backgroundColor: 'white',
+        fontFamily: 'Arial',
+        fontWeight: 'normal'
+      },
+      words: [],
+      clearBord: ''
+    }
+  },
   components: {
-    HelloWorld
-  }
+    Header
+  },
+  methods: {
+    onInput(e) {
+      this.board = e.target.innerText
+      this.debounce()
+    },
+    setting(e) {
+      this.settings = e
+    },
+    setWords() {
+      this.board.split(' ').map(item => {
+        this.words.push({
+          id: Date.now(),
+          text: item,
+          fontSize: this.settings.fontSize,
+          color: this.settings.textColor,
+          backgroundColor: this.settings.backgroundColor,
+          fontFamaly: this.settings.font,
+          fontWeight: this.settings.fontWeight
+        })
+      })
+      console.log(this.words)
+    }
+  },
+  computed: {
+    debounce() {
+      let timeoutId
+      return () => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          timeoutId = null
+          this.setWords()
+          document.querySelector('.board').innerHTML = ''
+        }, 1000)
+      }
+    },
+  },
 };
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.board {
+  width: 100%;
+  height: calc(100vh - 75px);
 }
 </style>
